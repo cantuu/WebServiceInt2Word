@@ -32,8 +32,6 @@ $ curl http://127.0.0.1:3000/15
 Caso o número inteiro esteja dentro do intervalo definido de -99999 até 99999, o json de resposta será o seguinte:
 
 > { "extenso": "doze mil e trezentos e quarenta e cinco" }
-> { "extenso": "Menos noventa e oito mil e setecentos e sessenta e cinco" }
-> { "extenso": "quinze" }
 
 Caso um erro ocorra durante o processamento da requisição ou é enviado no path da requisição um número fora do intervalo permitido, uma resposta de erro será enviada ao usuário requisitante:
 
