@@ -10,6 +10,7 @@ class InvalidUsage(Exception):
 
     def to_dict(self):
         rv = dict(self.payload or ())
-        rv['message'] = self.message
-        rv['status_code'] = self.status_code
+        rv['mensagem'] = self.message
+        rv['estado'] = self.status_code
+        rv['extenso'] = ''
         return rv

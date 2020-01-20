@@ -2,7 +2,7 @@
 
 import sys
 from flask import Flask, jsonify
-from invalidUsage import InvalidUsage
+from invalidUsage import *
 
 __author__ = 'Gabriel Cantu'
 
@@ -17,21 +17,39 @@ HUNDREDS = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 
 app = Flask(__name__)
 
 #------------------------------------------------------------------------
+#----------------------   ERROR HANDLER   -------------------------------
+#------------------------------------------------------------------------
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+@app.errorhandler(Exception)
+def unhandled_exception(error):
+    logger.exception ('EXCECAO NAO TRATADA. ABORTANDO. ERRO: {}'.format(error))
+    return "Excecao nao tratada!!", 500
+
+#------------------------------------------------------------------------
+#--------------------------   ROUTES   ----------------------------------
+#------------------------------------------------------------------------
 @app.route('/<path:path>', methods=['GET'])
 def extensionNumber(path):
 
     word = num2word(path)
-    print ('FINAL WORD: {}'.format(word))
+    print ('Numero extenso: {}'.format(word))
     return jsonify ({'extenso': word})
 
 #---------------------------------------------------------
+# Verifica se o numero eh negativo.
 def isNegative (number):
 
     if number < 0: return True
     return False
 
-
 #---------------------------------------------------------
+# Funcao para tratar os numeros mais significantes.
+# Nesse caso, trata as milhares e as dezenas de milhares.
 def treatThousands (number):
 
     thousands = int((number%10000)/1000)
@@ -52,10 +70,12 @@ def treatThousands (number):
         else:
             word = word + ' mil'
 
-    print ('CANTU 3 - WORD MILS: {}'.format(word))
+    print ('[treatThousands] - Milhares em extenso: {}'.format(word))
     return word
 
-#---------------------------------------------------------
+#--------------------------------------------------------
+# Funcao para tratar os numeros menos significantes.
+# Trata centenas, dezenas e unidades.
 def treatHundreds (number):
 
     unit=number%10
@@ -86,16 +106,18 @@ def treatHundreds (number):
         if wordTens != '':
             word = wordTens
 
-    print ('CANTU 4 - WORD CENTENAS: {}'.format(word))
+    print ('[treatHundreds] - Centenas em extenso: {}'.format(word))
     return word
 
 #------------------------------------------------------------------------
+# Funcao de conversao do numero inteiro para extenso.
+# Verifica se o numero eh um inteiro e esta dentro dos limites estabelecidos
 def num2word(number):
 
     try:
         intNumber = int(number)
     except:
-        raise InvalidUsage ('Erro ao converter o path recebido para inteiro.')
+        raise InvalidUsage ('Erro ao converter o path recebido para inteiro.', status_code=400)
 
     if intNumber == 0:
         return 'Zero'
@@ -106,15 +128,15 @@ def num2word(number):
         intNumber = -intNumber
 
     if intNumber > MAX_NUMBER:
-        raise InvalidUsage ('Numero fora dos limites aceitos.')
+        raise InvalidUsage ('Numero fora dos limites aceitos.', status_code=400)
 
-    print ('CANTU 0 - NUMERO: {}'.format(intNumber))
+    print ('[num2word] - Numero recebido: {}'.format(intNumber))
 
     hundreds  = intNumber % 1000
     thousands = (intNumber % 100000) - hundreds
 
-    print ('CANTU 1 - CENTENA: {}'.format(hundreds))
-    print ('CANTU 2 - MILHARES: {}'.format(thousands))
+    print ('[num2word] - Centenas: {}'.format(hundreds))
+    print ('[num2word] - Milhares: {}'.format(thousands))
 
     wordThousands = treatThousands(thousands)
     wordHundreds  = treatHundreds (hundreds)
@@ -129,10 +151,9 @@ def num2word(number):
             finalNumber = wordHundreds
 
     if negative:
-        finalNumber = 'Menos ' + finalNumber
+        finalNumber = 'menos ' + finalNumber
 
     return finalNumber
-
 
 #------------------------------------------------------------------------
 def runFlask():
@@ -145,3 +166,4 @@ def runFlask():
 if __name__ == '__main__':
     runFlask()
 
+#[EOF]
