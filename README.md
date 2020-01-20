@@ -59,3 +59,21 @@ ou simplesmente:
 ```sh
 $ pytest
 ```
+
+# Rodando o WebServiceInt2Word através de Docker
+
+Caso não seja apropriado realizar as instalações de pacotes e dependências no ambiente local, o WebServiceInt2Word pode ser inicializado através de um contêiner. Para isso, faz-se necessário construir a sua imagem utilizando Docker, e posteriormente executá-la.
+
+Para esse caso em específico, parte-se do pressuposto que a ferramenta Docker esteja instalada. Caso contrario, o passo a passo da instalação pode ser encontrado [aqui](https://docs.docker.com/install/)
+
+Para isso, basta abrir um terminal no diretório onde o projeto foi clonado, entrar no diretório src/, e executar os seguintes comandos:
+
+```sh
+$ docker build -t docker_flask:latest .
+
+$ docker run -d -p 3000:3000 docker_flask:latest
+```
+
+As requisições podem ser enviadas para o Servidor através de um terminal, utilizando o comando curl, ou digitando a url em um Browser, por exemplo:
+
+> http://127.0.0.1:3000/10258
